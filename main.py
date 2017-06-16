@@ -19,6 +19,22 @@ def self_info():
             print "User does not exist."
     else:
         print "Status code other than 200 received."
-self_info()
+#self_info()
+
+#Function for getting user id of any user.
+
+def get_user_id(insta_username):
+    request_url = (BASE_URL + "users/search?q=%s&access_token=%s") % (insta_username,ACCESS_TOKEN)
+    print "Request URL: %s" % (request_url)
+    user_info = requests.get(request_url).json()
+    if user_info['meta']['code'] == 200:
+        if len(user_info['data']):
+            return user_info['data']['0']['id']
+        else:
+            return None
+    else:
+        print "Status code other than 200 received"
+    exit()
+print get_user_id()
 
 
