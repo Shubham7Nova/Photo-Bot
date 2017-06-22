@@ -7,7 +7,7 @@ BASE_URL = "https://api.instagram.com/v1/"
 
 def self_info():
     request_url = (BASE_URL + "users/self/?access_token=%s") % (ACCESS_TOKEN)
-    print "GET request URL : %s." % (request_url)
+    print "GET request URL for self info : %s." % (request_url)
     user_info = requests.get(request_url).json()
     print user_info
     if user_info['meta']['code'] == 200:
@@ -20,23 +20,22 @@ def self_info():
             print "User does not exist."
     else:
         print "Status code other than 200 received."
-#self_info()
+
 
 #Function for getting user id of any user.
 
 def get_user_id(insta_username):
     request_url = (BASE_URL + "users/search?q=%s&access_token=%s") % (insta_username,ACCESS_TOKEN)
-    print "Request URL: %s" % (request_url)
+    print "Request URL for User ID : %s" % (request_url)
     user_info = requests.get(request_url).json()
     if user_info['meta']['code'] == 200:
         if len(user_info['data']):
-            return user_info['data']['0']['id']
+            return user_info['data'][0]['id']
         else:
             return None
     else:
         print "Status code other than 200 received"
     exit()
-print get_user_id("payal.mittal95")
 
 #Function for getting recent information about a user using User ID.
 
@@ -46,7 +45,7 @@ def get_user_info(insta_username):
         print "Invalid Username."
         exit()
     request_url = (BASE_URL + "users/%s/?access_token=%s") % (user_id,ACCESS_TOKEN)
-    print 'GET request url : %s' % (request_url)
+    print 'GET request url for info of a user: %s' % (request_url)
     user_info = requests.get(request_url).json()
     if user_info['meta']['code'] == 200:
         if len(user_info['data']):
@@ -63,7 +62,7 @@ def get_user_info(insta_username):
 
 def get_own_post():
     request_url = (BASE_URL + "users/self/media/recent/?access_token=%s") % (ACCESS_TOKEN)
-    print ("GET request URL: %s") % (request_url)
+    print ("GET request URL for getting own posts: %s") % (request_url)
     own_media = requests.get(request_url).json()
 
     if own_media['meta']['code'] == 200:
@@ -85,7 +84,7 @@ def get_user_post(insta_username):
         print 'User does not exist!'
         exit()
     request_url = (BASE_URL + "users/%s/media/recent/?access_token=%s")%(user_id,ACCESS_TOKEN)
-    print ("GET request URL : %s") % (request_url)
+    print ("GET request URL for getting posts of a user: %s") % (request_url)
     user_media = requests.get(request_url).json()
     if user_media['meta']['code'] == 200:
         if len((user_media['data'])):
@@ -106,7 +105,7 @@ def get_post_id(insta_username):
         print "User does not exist."
         exit()
     request_url = (BASE_URL + "users/%s/media/recent/?access_token=%s") % (user_id,ACCESS_TOKEN)
-    print ("GET request URL: %s") % (request_url)
+    print ("GET request URL for getting post ID: %s") % (request_url)
     user_media = requests.get(request_url).json()
 
     if user_media['meta']['code'] == 200:
@@ -123,7 +122,7 @@ def get_post_id(insta_username):
 def get_like_list(insta_username):
     media_id  = get_post_id(insta_username)
     request_url = (BASE_URL + "media/%s/likes?access_token=%s") % (media_id,ACCESS_TOKEN)
-    print ("GET request URL: %s") % (request_url)
+    print ("GET request URL for getting like list: %s") % (request_url)
     likes_info = requests.get(request_url).json()
 
     if likes_info['meta']['code'] == 200:
@@ -147,3 +146,26 @@ def like_a_post(insta_username):
         print "Like was successful.!"
     else:
         print "Your like was unsuccessful. Try again!"
+
+#Function to get list of comments on a media using media id.
+
+def get_comment_list(insta_username):
+    media_id = get_post_id(insta_username)
+    request_url = (BASE_URL + "media/%s/comments?access_token=%s")%(media_id,ACCESS_TOKEN)
+    print "GET request URL for getting comment list: %s" % (request_url)
+    comment_list = requests.get(request_url).json()
+    if comment_list['meta']['code'] == 200:
+        if len(comment_list['data']):
+            for x in range(0, len(comment_list['data'])):
+                print "%s commented : %s." % (comment_list['data'][x]['from']['username'],comment_list['data'][x]['text'])
+        else:
+            print "There are no comments on the post."
+    else:
+        print "Status code other than 200 received."
+#get_comment_list("shubham7nova")
+
+
+
+
+
+
