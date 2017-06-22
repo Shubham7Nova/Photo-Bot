@@ -1,6 +1,9 @@
 from keys import ACCESS_TOKEN
 import requests
 import urllib
+from textblob import TextBlob
+from textblob.sentiments import NaiveBayesAnalyzer
+
 BASE_URL = "https://api.instagram.com/v1/"
 
 #Defining function for prinitng our own info.
@@ -162,7 +165,6 @@ def get_comment_list(insta_username):
             print "There are no comments on the post."
     else:
         print "Status code other than 200 received."
-#get_comment_list("shubham7nova")
 
 #Function added for posting a comment on a post.
 def post_a_comment(insta_username):
@@ -178,7 +180,86 @@ def post_a_comment(insta_username):
         print "Unable to add comment. Try again!"
 
 
+#Code for deleting negative comments.
+def delete_negative_comment(insta_username):
+    media_id = get_post_id(insta_username)
+    request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, ACCESS_TOKEN)
+    print 'GET request url : %s' % (request_url)
+    comment_info = requests.get(request_url).json()
 
+    if comment_info['meta']['code'] == 200:
+        if len(comment_info['data']):
+            #Deleting negative comments using TextBlob
+            for x in range(0, len(comment_info['data'])):
+                comment_id = comment_info['data'][x]['id']
+                comment_text = comment_info['data'][x]['text']
+                blob = TextBlob(comment_text, analyzer=NaiveBayesAnalyzer())
+                if (blob.sentiment.p_neg > blob.sentiment.p_pos):
+                    print 'Negative comment : %s' % (comment_text)
+                    delete_url = (BASE_URL + 'media/%s/comments/%s/?access_token=%s') % (media_id, comment_id,ACCESS_TOKEN)
+                    print 'DELETE request url : %s' % (delete_url)
+                    delete_info = requests.delete(delete_url).json()
+
+                    if delete_info['meta']['code'] == 200:
+                        print 'Comment successfully deleted!\n'
+                    else:
+                        print 'Unable to delete comment!'
+                else:
+                    print 'Positive comment : %s\n' % (comment_text)
+        else:
+            print 'There are no existing comments on the post!'
+    else:
+        print 'Status code other than 200 received!'
+
+#Function for showing menu of the bot.
+def start_bot():
+    while True:
+        print '\n'
+        print 'Hey! Welcome to PhotoBot!'
+        print 'Here are the list of things you can do:'
+        print "a.Get your own details.\n"
+        print "b.Get details of a user by username.\n"
+        print "c.Get your own recent post.\n"
+        print "d.Get the recent post of a user by username.\n"
+        print "e.Get a list of people who have liked the recent post of a user.\n"
+        print "f.Like the recent post of a user.\n"
+        print "g.Get a list of comments on the recent post of a user.\n"
+        print "h.Make a comment on the recent post of a user.\n"
+        print "i.Delete negative comments from the recent post of a user.\n"
+        print "j.Exit."
+
+        choice = raw_input("Enter you choice: ")
+        if choice == "a":
+            self_info()
+        elif choice == "b":
+            insta_username = raw_input("Enter the username of the user: ")
+            get_user_info(insta_username)
+        elif choice == "c":
+            get_own_post()
+        elif choice == "d":
+            insta_username = raw_input("Enter the username of the user: ")
+            get_user_post(insta_username)
+        elif choice == "e":
+           insta_username = raw_input("Enter the username of the user: ")
+           get_like_list(insta_username)
+        elif choice == "f":
+           insta_username = raw_input("Enter the username of the user: ")
+           like_a_post(insta_username)
+        elif choice == "g":
+           insta_username = raw_input("Enter the username of the user: ")
+           get_comment_list(insta_username)
+        elif choice == "h":
+           insta_username = raw_input("Enter the username of the user: ")
+           post_a_comment(insta_username)
+        elif choice == "i":
+           insta_username = raw_input("Enter the username of the user: ")
+           delete_negative_comment(insta_username)
+        elif choice == "j":
+            exit()
+        else:
+            print "Wrong choice. Select another option from the menu.!"
+
+start_bot()
 
 
 
