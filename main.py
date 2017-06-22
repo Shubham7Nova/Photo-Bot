@@ -164,6 +164,19 @@ def get_comment_list(insta_username):
         print "Status code other than 200 received."
 #get_comment_list("shubham7nova")
 
+#Function added for posting a comment on a post.
+def post_a_comment(insta_username):
+    media_id = get_post_id(insta_username)
+    comment_text = raw_input("What do you want to comment?\n")
+    payload = {"access_token" :ACCESS_TOKEN,"text" :comment_text}
+    request_url = (BASE_URL + "media/%s/comments") % (media_id)
+    print 'POST request url for posting a comment : %s' % (request_url)
+    make_comment = requests.post(request_url).json()
+    if make_comment['meta']['code'] == 200:
+        print "Successfully added your comment!"
+    else:
+        print "Unable to add comment. Try again!"
+
 
 
 
