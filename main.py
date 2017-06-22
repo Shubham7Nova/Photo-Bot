@@ -1,6 +1,9 @@
 from keys import ACCESS_TOKEN
+#Requests imported for using GET/POST and Json.
 import requests
+#Urllib imported for downloading images.
 import urllib
+#Textblob imported for Natural Language Processing(Deleting negative comments.)
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
 
@@ -72,6 +75,7 @@ def get_own_post():
         if (own_media['data']):
             image_name = own_media['data'][0]['id'] + '.jpeg'
             image_url = own_media ['data'][0]['images']['standard_resolution']['url']
+            #code for downloading the selected image.
             urllib.urlretrieve(image_url,image_name)
             print "Your image has been downloaded."
         else:
@@ -130,6 +134,7 @@ def get_like_list(insta_username):
 
     if likes_info['meta']['code'] == 200:
         if len(likes_info['data']):
+            # Condition for iterating in the likes info dictionary for printing the list of likes.
             for x in range(0, len(likes_info['data'])):
                 print likes_info['data'][x]['username']
         else:
@@ -142,8 +147,10 @@ def get_like_list(insta_username):
 def like_a_post(insta_username):
     media_id = get_post_id(insta_username)
     request_url = (BASE_URL + "media/%s/likes") % (media_id)
+    #payload dictionary for using POST.
     payload = {"access_token": ACCESS_TOKEN}
     print "POST request URL : %s" % (request_url)
+    #Code for posting a like.
     post_a_like = requests.post(request_url, payload).json()
     if post_a_like['meta']['code'] == 200:
         print "Like was successful.!"
@@ -159,6 +166,7 @@ def get_comment_list(insta_username):
     comment_list = requests.get(request_url).json()
     if comment_list['meta']['code'] == 200:
         if len(comment_list['data']):
+            #Condition for iterating in the comment_list dictionary for printing the list of comments.
             for x in range(0, len(comment_list['data'])):
                 print "%s commented : %s." % (comment_list['data'][x]['from']['username'],comment_list['data'][x]['text'])
         else:
@@ -170,6 +178,7 @@ def get_comment_list(insta_username):
 def post_a_comment(insta_username):
     media_id = get_post_id(insta_username)
     comment_text = raw_input("What do you want to comment?\n")
+    #Payload defined for posting a comment.
     payload = {"access_token" :ACCESS_TOKEN,"text" :comment_text}
     request_url = (BASE_URL + "media/%s/comments") % (media_id)
     print 'POST request url for posting a comment : %s' % (request_url)
@@ -189,11 +198,12 @@ def delete_negative_comment(insta_username):
 
     if comment_info['meta']['code'] == 200:
         if len(comment_info['data']):
-            #Deleting negative comments using TextBlob
+            #Deleting negative comments using TextBlob.
             for x in range(0, len(comment_info['data'])):
                 comment_id = comment_info['data'][x]['id']
                 comment_text = comment_info['data'][x]['text']
                 blob = TextBlob(comment_text, analyzer=NaiveBayesAnalyzer())
+                #Condition for checking if the comment is positive or negative.
                 if (blob.sentiment.p_neg > blob.sentiment.p_pos):
                     print 'Negative comment : %s' % (comment_text)
                     delete_url = (BASE_URL + 'media/%s/comments/%s/?access_token=%s') % (media_id, comment_id,ACCESS_TOKEN)
@@ -211,11 +221,11 @@ def delete_negative_comment(insta_username):
     else:
         print 'Status code other than 200 received!'
 
-#Function for showing menu of the bot.
+#Function for showing menu of the bot from which user can select required function via standarad input.
 def start_bot():
     while True:
         print '\n'
-        print 'Hey! Welcome to PhotoBot!'
+        print 'Hey! Welcome to PhotoBot for Instagram.!'
         print 'Here are the list of things you can do:'
         print "a.Get your own details.\n"
         print "b.Get details of a user by username.\n"
@@ -229,6 +239,7 @@ def start_bot():
         print "j.Exit."
 
         choice = raw_input("Enter you choice: ")
+        #Various function calls encoded in the corresponding choices.
         if choice == "a":
             self_info()
         elif choice == "b":
